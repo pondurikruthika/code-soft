@@ -6,14 +6,14 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.layers import Input, Dense, Embedding, LSTM, Dropout, add
 import numpy as np
 
-# Load VGG16 model
+
 base_model = VGG16()
 feature_extractor = Model(
     inputs=base_model.inputs,
     outputs=base_model.layers[-2].output
 )
 
-# Extract image features
+
 def extract_features(filename):
     image = load_img(filename, target_size=(224,224))
     image = img_to_array(image)
@@ -22,7 +22,7 @@ def extract_features(filename):
     feature = feature_extractor.predict(image, verbose=0)
     return feature
 
-# Load captions
+
 def load_captions(filename):
     captions = {}
     with open(filename, 'r') as file:
@@ -35,10 +35,10 @@ def load_captions(filename):
             captions[image_id].append(caption)
     return captions
 
-# Load caption file
+
 captions = load_captions("captions.txt")
 
-# Tokenizer
+
 all_captions = []
 for cap_list in captions.values():
     all_captions.extend(cap_list)
@@ -49,7 +49,7 @@ tokenizer.fit_on_texts(all_captions)
 vocab_size = len(tokenizer.word_index) + 1
 max_length = 34
 
-# Build Model
+
 inputs1 = Input(shape=(4096,))
 fe1 = Dropout(0.5)(inputs1)
 fe2 = Dense(256, activation='relu')(fe1)
@@ -72,10 +72,7 @@ model.compile(
 
 print(model.summary())
 
-# Training
-# model.fit(train_generator, epochs=20, verbose=1)
 
-# Caption Generation
 def generate_caption(model, tokenizer, photo, max_length):
     text = "startseq"
 
@@ -106,7 +103,7 @@ def generate_caption(model, tokenizer, photo, max_length):
 
     return text
 
-# Example Usage
+
 image_path = "dog.jpg"
 
 photo = extract_features(image_path)
