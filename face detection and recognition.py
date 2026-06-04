@@ -1,28 +1,42 @@
+import numpy as np
+from PIL import Image
 from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input
+from tensorflow.keras.layers import Input, Dense, Embedding, LSTM, Dropout, add
 from tensorflow.keras.models import Model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
-from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.layers import Input, Dense, Embedding, LSTM, Dropout, add
-import numpy as np
+from tensorflow.keras.preprocessing.text import Tokenizer
 
-# Load VGG16 model
+
+with open('captions.txt', 'w') as f:
+    f.write('dog.jpg, A dog is running in the grass\n')
+    f.write('dog.jpg, A brown dog is playing outside\n')
+    f.write('cat.jpg, A cat is sleeping on the couch\n')
+    f.write('cat.jpg, A black cat is relaxing indoors\n')
+print("Created 'captions.txt' file.")
+
+
+dummy_image = Image.fromarray(np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8))
+dummy_image.save('dog.jpg')
+print("Created a dummy 'dog.jpg' file.")
+
+
 base_model = VGG16()
 feature_extractor = Model(
     inputs=base_model.inputs,
     outputs=base_model.layers[-2].output
 )
 
-# Extract image features
+
 def extract_features(filename):
-    image = load_img(filename, target_size=(224,224))
+    image = load_img(filename, target_size=(224, 224))
     image = img_to_array(image)
-    image = image.reshape((1,224,224,3))
+    image = image.reshape((1, 224, 224, 3))
     image = preprocess_input(image)
     feature = feature_extractor.predict(image, verbose=0)
     return feature
 
-# Load captions
+
 def load_captions(filename):
     captions = {}
     with open(filename, 'r') as file:
@@ -35,10 +49,10 @@ def load_captions(filename):
             captions[image_id].append(caption)
     return captions
 
-# Load caption file
+
 captions = load_captions("captions.txt")
 
-# Tokenizer
+
 all_captions = []
 for cap_list in captions.values():
     all_captions.extend(cap_list)
@@ -49,7 +63,7 @@ tokenizer.fit_on_texts(all_captions)
 vocab_size = len(tokenizer.word_index) + 1
 max_length = 34
 
-# Build Model
+
 inputs1 = Input(shape=(4096,))
 fe1 = Dropout(0.5)(inputs1)
 fe2 = Dense(256, activation='relu')(fe1)
@@ -72,10 +86,7 @@ model.compile(
 
 print(model.summary())
 
-# Training
-# model.fit(train_generator, epochs=20, verbose=1)
 
-# Caption Generation
 def generate_caption(model, tokenizer, photo, max_length):
     text = "startseq"
 
@@ -106,7 +117,7 @@ def generate_caption(model, tokenizer, photo, max_length):
 
     return text
 
-# Example Usage
+
 image_path = "dog.jpg"
 
 photo = extract_features(image_path)
@@ -120,3 +131,4 @@ caption = generate_caption(
 
 print("Generated Caption:")
 print(caption)
+
