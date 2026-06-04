@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Sample Movie Dataset
+
 movies = pd.DataFrame({
     'title': [
         'Avatar',
@@ -30,14 +30,14 @@ movies = pd.DataFrame({
     ]
 })
 
-# Convert genres into numerical features
+
 cv = CountVectorizer()
 count_matrix = cv.fit_transform(movies['genre'])
 
-# Calculate similarity scores
+
 similarity = cosine_similarity(count_matrix)
 
-# Recommendation function
+
 def recommend(movie_name):
     
     if movie_name not in movies['title'].values:
@@ -67,7 +67,7 @@ def recommend(movie_name):
         if count == 5:
             break
 
-# Main Program
+
 print("Available Movies:")
 for movie in movies['title']:
     print("-", movie)
